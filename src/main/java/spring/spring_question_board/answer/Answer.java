@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import spring.spring_question_board.question.Question;
+import spring.spring_question_board.user.SiteUser;
 
 import java.time.LocalDateTime;
 
@@ -27,4 +28,7 @@ public class Answer {
 
     @ManyToOne
     private Question question;
+
+    @ManyToOne
+    private SiteUser author;
 }
