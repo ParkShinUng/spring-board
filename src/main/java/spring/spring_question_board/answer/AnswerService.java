@@ -1,5 +1,6 @@
 package spring.spring_question_board.answer;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import spring.spring_question_board.DataNotFoundException;
@@ -9,6 +10,7 @@ import spring.spring_question_board.user.SiteUser;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class AnswerService {

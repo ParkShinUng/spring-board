@@ -9,6 +9,7 @@ import spring.spring_question_board.question.QuestionService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Transactional
 @SpringBootTest
 class SpringQuestionBoardApplicationTests {
 
