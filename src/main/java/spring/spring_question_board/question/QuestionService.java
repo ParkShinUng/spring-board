@@ -1,13 +1,16 @@
 package spring.spring_question_board.question;
 
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import spring.spring_question_board.DataNotFoundException;
+import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.user.SiteUser;
 
 import java.time.LocalDateTime;
@@ -22,11 +25,31 @@ public class QuestionService {
 
     private final QuestionRepository questionRepository;
 
-    public Page<Question> getList(int page) {
+    public Specification<Question> search(String keyword) {
+        return new Specification<>() {
+            private static final long serialVersionID = 1L;
+            @Override
+            public Predicate toPredicate(Root<Question> questionRoot, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);       // 중복 제거
+                Join<Question, SiteUser> u1 = questionRoot.join("author", JoinType.LEFT);
+                Join<Question, Answer> a = questionRoot.join("answerList", JoinType.LEFT);
+                Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
+                return cb.or(cb.like(questionRoot.get("subject"), "%" + keyword + "%"),     // 제목
+                        cb.like(questionRoot.get("content"), "%" + keyword + "%"),          // 내용
+                        cb.like(u1.get("username"), "%" + keyword + "%"),           // 질문 작성자
+                        cb.like(a.get("content"), "%" + keyword + "%"),             // 답변 내용
+                        cb.like(u2.get("username"), "%" + keyword + "%"));          // 답변 작성자
+            }
+        };
+    }
+
+    public Page<Question> getList(int page, String keyword) {
         List<Sort.Order> sortList = new ArrayList<>();
         sortList.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
-        return this.questionRepository.findAll(pageable);
+        Specification<Question> spec = search(keyword);
+        return this.questionRepository.findAll(spec, pageable);
+//        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
     }
 
     public List<Question> getList() {
@@ -68,4 +91,5 @@ public class QuestionService {
         question.getVoter().add(siteUser);
         this.questionRepository.save(question);
     }
+
 }
