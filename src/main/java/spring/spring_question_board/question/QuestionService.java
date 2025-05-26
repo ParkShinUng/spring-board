@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import spring.spring_question_board.DataNotFoundException;
 import spring.spring_question_board.answer.Answer;
+import spring.spring_question_board.answer.AnswerRepository;
 import spring.spring_question_board.user.SiteUser;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
     public Specification<Question> search(String keyword) {
         return new Specification<>() {
@@ -50,6 +52,13 @@ public class QuestionService {
         Specification<Question> spec = search(keyword);
         return this.questionRepository.findAll(spec, pageable);
 //        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
+    }
+
+    public Page<Answer> getList(int page) {
+        List<Sort.Order> sortList = new ArrayList<>();
+        sortList.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
+        return this.answerRepository.findAll(pageable);
     }
 
     public List<Question> getList() {

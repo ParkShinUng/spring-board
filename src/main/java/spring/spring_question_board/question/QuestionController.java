@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.answer.AnswerForm;
 import spring.spring_question_board.user.SiteUser;
 import spring.spring_question_board.user.UserService;
@@ -36,8 +37,12 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm) {
+    public String detail(Model model, @PathVariable("id") Integer id,
+                         @RequestParam(value = "page", defaultValue = "0") int page,
+                         AnswerForm answerForm) {
         Question question = this.questionService.getQuestion(id);
+        Page<Answer> paging = this.questionService.getList(page);
+        model.addAttribute("paging", paging);
         model.addAttribute("question", question);
 
         return "question_detail";
