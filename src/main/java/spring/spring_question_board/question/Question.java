@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import spring.spring_question_board.answer.Answer;
+import spring.spring_question_board.category.Category;
 import spring.spring_question_board.user.SiteUser;
 
 import java.time.LocalDateTime;
@@ -41,4 +42,7 @@ public class Question {
 
     @ManyToMany
     Set<SiteUser> voter;
+
+    @ManyToOne
+    private Category category;
 }

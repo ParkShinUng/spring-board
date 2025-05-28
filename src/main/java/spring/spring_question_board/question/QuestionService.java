@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import spring.spring_question_board.DataNotFoundException;
 import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.answer.AnswerRepository;
+import spring.spring_question_board.category.Category;
 import spring.spring_question_board.user.SiteUser;
 
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public class QuestionService {
         };
     }
 
-    public Page<Question> getList(int page, String keyword) {
+    public Page<Question> getPagingQuestionList(int page, String keyword) {
         List<Sort.Order> sortList = new ArrayList<>();
         sortList.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
@@ -54,15 +55,18 @@ public class QuestionService {
 //        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
     }
 
-    public Page<Answer> getList(int page) {
+    public Page<Answer> getPagingAnswerList(int page) {
         List<Sort.Order> sortList = new ArrayList<>();
         sortList.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
         return this.answerRepository.findAll(pageable);
     }
 
-    public List<Question> getList() {
-        return this.questionRepository.findAll();
+    public Page<Question> getPagingCategoryQuestionList(Category category, int page) {
+        List<Sort.Order> sortList = new ArrayList<>();
+        sortList.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
+        return this.questionRepository.findByCategory(category, pageable);
     }
 
     public Question getQuestion(Integer id) {
@@ -74,12 +78,13 @@ public class QuestionService {
         }
     }
 
-    public void create(String subject, String content, SiteUser user) {
+    public void create(String subject, String content, Category category, SiteUser user) {
         Question q = new Question();
         q.setSubject(subject);
         q.setContent(content);
         q.setCreateDate(LocalDateTime.now());
         q.setAuthor(user);
+        q.setCategory(category);
 
         this.questionRepository.save(q);
     }

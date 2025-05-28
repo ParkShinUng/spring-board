@@ -7,12 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import spring.spring_question_board.answer.Answer;
+import spring.spring_question_board.category.Category;
 
 public interface QuestionRepository extends JpaRepository<Question, Integer> {
     Question findBySubject(String subject);
     Question findBySubjectAndContent(String subject, String content);
+
     Page<Question> findAll(Pageable pageable);
     Page<Question> findAll(Specification<Question> spec, Pageable pageable);
+
+    Page<Question> findByCategory(Category category, Pageable pageable);
 
     // 직접 쿼리 작성 방식
 //    @Query("select "

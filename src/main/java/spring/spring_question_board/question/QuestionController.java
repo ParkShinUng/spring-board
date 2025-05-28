@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.answer.AnswerForm;
+import spring.spring_question_board.category.Category;
+import spring.spring_question_board.category.CategoryService;
 import spring.spring_question_board.user.SiteUser;
 import spring.spring_question_board.user.UserService;
 
@@ -25,14 +27,17 @@ public class QuestionController {
 
     private final QuestionService questionService;
     private final UserService userService;
+    private final CategoryService categoryService;
 
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
                        @RequestParam(value = "keyword", defaultValue = "") String keyword) {
-        Page<Question> paging = this.questionService.getList(page, keyword);
+        Page<Question> paging = this.questionService.getPagingQuestionList(page, keyword);
+        List<Category> categoryList = this.categoryService.getList();
+
         model.addAttribute("paging", paging);
         model.addAttribute("keyword", keyword);
-
+        model.addAttribute("category_list", categoryList);
         return "question_list";
     }
 
@@ -41,16 +46,20 @@ public class QuestionController {
                          @RequestParam(value = "page", defaultValue = "0") int page,
                          AnswerForm answerForm) {
         Question question = this.questionService.getQuestion(id);
-        Page<Answer> paging = this.questionService.getList(page);
+        Page<Answer> paging = this.questionService.getPagingAnswerList(page);
+        List<Category> categoryList = this.categoryService.getList();
+
         model.addAttribute("paging", paging);
         model.addAttribute("question", question);
-
+        model.addAttribute("category_list", categoryList);
         return "question_detail";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
-    public String questionCreate(QuestionForm questionForm) {
+    public String questionCreate(QuestionForm questionForm, Model model) {
+        List<Category> categoryList = this.categoryService.getList();
+        model.addAttribute("category_list", categoryList);
         return "question_form";
     }
 
@@ -61,20 +70,25 @@ public class QuestionController {
             System.out.println("Question Create Error");
             return "question_form";
         }
-
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), siteUser);
+        Category category = this.categoryService.getCategory(questionForm.getCategory());
+        this.questionService.create(questionForm.getSubject(), questionForm.getContent(), category, siteUser);
 
         return "redirect:/question/list";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
-    public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id, Principal principal) {
+    public String questionModify(QuestionForm questionForm, @PathVariable("id") Integer id,
+                                 Principal principal, Model model) {
         Question question = this.questionService.getQuestion(id);
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
+
+        List<Category> categoryList = this.categoryService.getList();
+        model.addAttribute("category_list", categoryList);
+
         questionForm.setSubject(question.getSubject());
         questionForm.setContent(question.getContent());
         return "question_form";
@@ -83,7 +97,7 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/modify/{id}")
     public String questionModify(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal,
-                                 @PathVariable("id") Integer id) {
+                                 @PathVariable("id") Integer id, Model model) {
         if (bindingResult.hasErrors()) {
             return "question_form";
         }
@@ -91,29 +105,39 @@ public class QuestionController {
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
 
+        List<Category> categoryList = this.categoryService.getList();
+        model.addAttribute("category_list", categoryList);
+
+        this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
         return String.format("redirect:/question/detail/%s", id);
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
-    public String questionDelete(Principal principal, @PathVariable("id") Integer id) {
+    public String questionDelete(Principal principal, @PathVariable("id") Integer id, Model model) {
         Question question = this.questionService.getQuestion(id);
         System.out.println(question.getAuthor().getUsername());
         System.out.println(principal.getName());
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
         }
+        List<Category> categoryList = this.categoryService.getList();
+        model.addAttribute("category_list", categoryList);
+
         this.questionService.delete(question);
         return "redirect:/";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/vote/{id}")
-    public String questionVote(Principal principal, @PathVariable("id") Integer id) {
+    public String questionVote(Principal principal, @PathVariable("id") Integer id, Model model) {
         Question question = this.questionService.getQuestion(id);
         SiteUser siteUser = this.userService.getUser(principal.getName());
+
+        List<Category> categoryList = this.categoryService.getList();
+        model.addAttribute("category_list", categoryList);
+
         this.questionService.vote(question, siteUser);
         return String.format("redirect:/question/detail/%s", id);
     }
