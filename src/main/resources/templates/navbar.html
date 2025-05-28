@@ -21,7 +21,7 @@
   <table class="table">
     <thead>
       <tr class="text-center">
-        <th th:eacch="category, loop : ${category_list}">
+        <th th:each="category, loop : ${category_list}">
           <a class="nav-link" th:href="|/category/${category.name}|" th:text="${category.name}"></a>
         </th>
       </tr>

@@ -25,7 +25,7 @@ public class CategoryService {
         return this.categoryRepository.findAll();
     }
 
-    public Category getCategory(String name) {
+    public Category getCategoryByName(String name) {
         Optional<Category> category = this.categoryRepository.findByName(name);
         if (category.isPresent()) {
             return category.get();

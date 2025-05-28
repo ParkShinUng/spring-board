@@ -8,6 +8,7 @@ import spring.spring_question_board.category.Category;
 import spring.spring_question_board.category.CategoryService;
 import spring.spring_question_board.question.QuestionRepository;
 import spring.spring_question_board.question.QuestionService;
+import spring.spring_question_board.user.UserService;
 
 import java.time.LocalDateTime;
 
@@ -19,9 +20,13 @@ class SpringQuestionBoardApplicationTests {
 	@Autowired
 	private QuestionService questionService;
 
-//	@Autowired
-//	private CategoryService categoryService;
+	@Autowired
+	private UserService userService;
 
+	@Autowired
+	private CategoryService categoryService;
+
+	@Transactional
 	@Test
 	void testJpa() {
 		for (int i = 1; i <= 300; i++) {
@@ -31,14 +36,14 @@ class SpringQuestionBoardApplicationTests {
 		}
 	}
 
+	@Transactional
 	@Test
 	void testCreateCategoryQuestion() {
 		String subject = String.format("This is Test Subject - [%s]", LocalDateTime.now());
 		String content = String.format("Test Content - [%s]", LocalDateTime.now());
-		Category category = new Category();
-		category.setName("Board2");
 
-		this.questionService.create(subject, content, category, null);
+		this.categoryService.create("게시판1");
+		this.questionService.create(subject, content, this.categoryService.getCategoryByName("게시판1"), this.userService.getUser("tlsdnd001"));
 	}
 
 }
