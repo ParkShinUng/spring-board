@@ -103,7 +103,7 @@ public class UserController {
             model.addAttribute("error", false);
         }
 
-        return "find_account";
+        return "find_account_form";
     }
 
     public static class TempPasswordGenerator {
