@@ -1,7 +1,9 @@
 package spring.spring_question_board.user;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.mail.SimpleMailMessage;
@@ -24,15 +26,20 @@ import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.Random;
 
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
     private final QuestionService questionService;
     private final AnswerService answerService;
     private final JavaMailSender javaMailSender;
+
+    @PostConstruct
+    public void checkUserService() {
+        System.out.println("UserService is null? " + (this.userService == null));
+    }
 
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
@@ -51,7 +58,7 @@ public class UserController {
         }
 
         try {
-            userService.create(userCreateForm.getUsername(), userCreateForm.getEmail(), userCreateForm.getPassword());
+            this.userService.create(userCreateForm.getUsername(), userCreateForm.getEmail(), userCreateForm.getPassword());
         } catch(DataIntegrityViolationException e) {
             e.printStackTrace();
             bindingResult.reject("signupFailed", "이미 등록된 사용자입니다.");
@@ -107,7 +114,7 @@ public class UserController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    private String profile(Model model,
+    public String profile(Model model,
                            @RequestParam(value="question-page", defaultValue="0") int questionPage,
                            @RequestParam(value="answer-page", defaultValue="0") int answerPage,
                            @RequestParam(value="voter-page", defaultValue="0") int voterPage,
