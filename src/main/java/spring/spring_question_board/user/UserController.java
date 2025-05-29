@@ -74,17 +74,7 @@ public class UserController {
             SiteUser siteUser = this.userService.getUserByEmail(email);
 
             String newPassword = TempPasswordGenerator.generateTempPassword();
-            String mailContent = String.format("%s 님의 계정 비밀번호가 임시 비밀번호로 초기화 되었습니다.\n " +
-                    "임시 비밀번호는 %s 입니다.\n 로그인 후 새로운 비밀번호로 변경하시기 바랍니다.",
-                    siteUser.getUsername(), newPassword);
-
-            StringBuffer sb = new StringBuffer();
-            sb.append(mailContent);
-
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setTo(email);
-            simpleMailMessage.setSubject("[Board] 임시 비밀번호 발급 정보");
-            simpleMailMessage.setText(sb.toString());
+            SimpleMailMessage simpleMailMessage = getNewPasswordSimpleMailMessage(email, siteUser, newPassword);
 
             new Thread(new Runnable() {
                 @Override
@@ -104,6 +94,18 @@ public class UserController {
         }
 
         return "find_account_form";
+    }
+
+    private static SimpleMailMessage getNewPasswordSimpleMailMessage(String email, SiteUser siteUser, String newPassword) {
+        String mailContent = String.format("%s 님의 계정 비밀번호가 임시 비밀번호로 초기화 되었습니다.\n\n " +
+                "임시 비밀번호는 %s 입니다.\n\n 로그인 후 새로운 비밀번호로 변경하시기 바랍니다.",
+                siteUser.getUsername(), newPassword);
+
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setTo(email);
+        simpleMailMessage.setSubject("[Board] 임시 비밀번호 발급 정보");
+        simpleMailMessage.setText(mailContent);
+        return simpleMailMessage;
     }
 
     public static class TempPasswordGenerator {
