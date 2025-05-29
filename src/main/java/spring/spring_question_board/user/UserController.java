@@ -3,8 +3,10 @@ package spring.spring_question_board.user;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,7 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import spring.spring_question_board.DataNotFoundException;
+import spring.spring_question_board.answer.Answer;
+import spring.spring_question_board.answer.AnswerService;
+import spring.spring_question_board.question.Question;
+import spring.spring_question_board.question.QuestionService;
 
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -23,6 +30,8 @@ import java.util.Random;
 public class UserController {
 
     private final UserService userService;
+    private final QuestionService questionService;
+    private final AnswerService answerService;
     private final JavaMailSender javaMailSender;
 
     @GetMapping("/signup")
@@ -94,6 +103,29 @@ public class UserController {
         }
 
         return "find_account_form";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    private String profile(Model model,
+                           @RequestParam(value="question-page", defaultValue="0") int questionPage,
+                           @RequestParam(value="answer-page", defaultValue="0") int answerPage,
+                           @RequestParam(value="voter-page", defaultValue="0") int voterPage,
+                           Principal principal) {
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        Page<Question> wroteQuestions = this.questionService.getListByAuthor(questionPage, siteUser);
+        Page<Answer> wroteAnswers = this.answerService.getListByAuthor(answerPage, siteUser);
+        Page<Question> votedQuestions = this.questionService.getListByVoter(voterPage, siteUser);
+        Page<Answer> votedAnswers = this.answerService.getListByVoter(voterPage, siteUser);
+
+        model.addAttribute("wrote_question_paging", wroteQuestions);
+        model.addAttribute("wrote_answer_paging", wroteAnswers);
+        model.addAttribute("voted_question_paging", votedQuestions);
+        model.addAttribute("voted_answer_paging", votedAnswers);
+        model.addAttribute("username", siteUser.getUsername());
+        model.addAttribute("userEmail", siteUser.getEmail());
+
+        return "profile_form";
     }
 
     private static SimpleMailMessage getNewPasswordSimpleMailMessage(String email, SiteUser siteUser, String newPassword) {

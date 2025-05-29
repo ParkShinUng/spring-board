@@ -24,7 +24,7 @@
             </thead>
             <tbody>
             <tr class="text-center" th:each="question, loop : ${paging}">
-                <td th:text="${(paging.number * paging.size) + loop.index}"></td>
+                <td th:text="${(paging.number * paging.size) + loop.index + 1}"></td>
                 <td class="text-start">
                     <a th:href="@{|/question/detail/${question.id}|}"
                        th:text="${question.subject}"></a>

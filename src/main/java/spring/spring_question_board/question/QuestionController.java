@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.answer.AnswerForm;
+import spring.spring_question_board.answer.AnswerService;
 import spring.spring_question_board.category.Category;
 import spring.spring_question_board.category.CategoryService;
 import spring.spring_question_board.user.SiteUser;
@@ -26,6 +27,7 @@ import java.util.List;
 public class QuestionController {
 
     private final QuestionService questionService;
+    private final AnswerService answerService;
     private final UserService userService;
     private final CategoryService categoryService;
 
@@ -46,7 +48,7 @@ public class QuestionController {
                          @RequestParam(value = "page", defaultValue = "0") int page,
                          AnswerForm answerForm) {
         Question question = this.questionService.getQuestion(id);
-        Page<Answer> paging = this.questionService.getPagingAnswerList(page);
+        Page<Answer> paging = this.answerService.getListByQuestion(page, question);
         List<Category> categoryList = this.categoryService.getList();
 
         model.addAttribute("paging", paging);

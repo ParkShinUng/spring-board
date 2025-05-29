@@ -26,19 +26,18 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
-    private final AnswerRepository answerRepository;
 
     public Specification<Question> search(String keyword) {
         return new Specification<>() {
             private static final long serialVersionID = 1L;
             @Override
-            public Predicate toPredicate(Root<Question> questionRoot, CriteriaQuery<?> query, CriteriaBuilder cb) {
+            public Predicate toPredicate(Root<Question> qRoot, CriteriaQuery<?> query, CriteriaBuilder cb) {
                 query.distinct(true);       // 중복 제거
-                Join<Question, SiteUser> u1 = questionRoot.join("author", JoinType.LEFT);
-                Join<Question, Answer> a = questionRoot.join("answerList", JoinType.LEFT);
+                Join<Question, SiteUser> u1 = qRoot.join("author", JoinType.LEFT);
+                Join<Question, Answer> a = qRoot.join("answerList", JoinType.LEFT);
                 Join<Answer, SiteUser> u2 = a.join("author", JoinType.LEFT);
-                return cb.or(cb.like(questionRoot.get("subject"), "%" + keyword + "%"),     // 제목
-                        cb.like(questionRoot.get("content"), "%" + keyword + "%"),          // 내용
+                return cb.or(cb.like(qRoot.get("subject"), "%" + keyword + "%"),     // 제목
+                        cb.like(qRoot.get("content"), "%" + keyword + "%"),          // 내용
                         cb.like(u1.get("username"), "%" + keyword + "%"),           // 질문 작성자
                         cb.like(a.get("content"), "%" + keyword + "%"),             // 답변 내용
                         cb.like(u2.get("username"), "%" + keyword + "%"));          // 답변 작성자
@@ -46,26 +45,27 @@ public class QuestionService {
         };
     }
 
+    public Specification<Question> hasVoter(SiteUser siteUser) {
+        return new Specification<Question>() {
+            private static final long serialVersionID = 1L;
+
+            @Override
+            public Predicate toPredicate(Root<Question> qRoot, CriteriaQuery<?> query, CriteriaBuilder cb) {
+                query.distinct(true);
+                return cb.isMember(siteUser, qRoot.get("voter"));
+            }
+        };
+    }
+
     public Page<Question> getPagingQuestionList(int page, String keyword) {
-        List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
+        Pageable pageable = getPageable(page, 10, "createDate");
         Specification<Question> spec = search(keyword);
         return this.questionRepository.findAll(spec, pageable);
 //        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
     }
 
-    public Page<Answer> getPagingAnswerList(int page) {
-        List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
-        return this.answerRepository.findAll(pageable);
-    }
-
     public Page<Question> getPagingCategoryQuestionList(Category category, int page) {
-        List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc("createDate"));
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(sortList));
+        Pageable pageable = getPageable(page, 10, "createDate");
         return this.questionRepository.findByCategory(category, pageable);
     }
 
@@ -106,4 +106,20 @@ public class QuestionService {
         this.questionRepository.save(question);
     }
 
+    public Page<Question> getListByAuthor(int page, SiteUser siteUser) {
+        Pageable pageable = getPageable(page, 5, "createDate");
+        return this.questionRepository.findByAuthor(siteUser, pageable);
+    }
+
+    public Page<Question> getListByVoter(int page, SiteUser siteUser) {
+        Pageable pageable = getPageable(page, 5, "createDate");
+        Specification<Question> spec = this.hasVoter(siteUser);
+        return this.questionRepository.findAll(spec, pageable);
+    }
+
+    private Pageable getPageable(int page, int pageSize, String sortProperty) {
+        List<Sort.Order> sortList = new ArrayList<>();
+        sortList.add(Sort.Order.desc(sortProperty));
+        return PageRequest.of(page, pageSize, Sort.by(sortList));
+    }
 }
