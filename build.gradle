@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	// Thymeleaf
@@ -31,6 +30,8 @@ dependencies {
 
 	// H2 Database
 	runtimeOnly 'com.h2database:h2'
+
+	// JPA
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 
 	// lombok
@@ -39,7 +40,7 @@ dependencies {
 	testImplementation('org.projectlombok:lombok')
 	testAnnotationProcessor('org.projectlombok:lombok')
 
-	// JPA
+	// JUnit
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 
@@ -52,6 +53,9 @@ dependencies {
 
 	// MarkDown
 	implementation('org.commonmark:commonmark:0.21.0')
+
+	// Email
+	implementation('org.springframework.boot:spring-boot-starter-mail')
 }
 
 tasks.named('test') {
