@@ -78,7 +78,7 @@ public class AnswerService {
 
     public Page<Answer> getListByQuestion(int page, Question question) {
         Pageable pageable = this.getPageable(page, 5,"createDate");
-        return this.answerRepository.findAll(question, pageable);
+        return this.answerRepository.findByQuestion(question, pageable);
     }
 
     public Page<Answer> getListByAuthor(int page, SiteUser siteUser) {
