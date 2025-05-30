@@ -1,6 +1,7 @@
 package spring.spring_question_board.user;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +20,13 @@ public class SiteUser {
 
     @Column(unique = true)
     private String email;
+
+    private String registerId;
+
+    @Builder
+    public SiteUser() { }
+    public SiteUser(String username, String email) {
+        this.username = username;
+        this.email = email;
+    }
 }
