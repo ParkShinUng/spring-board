@@ -1,6 +1,7 @@
 package spring.spring_question_board.question;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import spring.spring_question_board.answer.Answer;
@@ -45,4 +46,8 @@ public class Question {
 
     @ManyToOne
     private Category category;
+
+    @Column(columnDefinition = "integer default 0")
+    @NotNull
+    private Integer viewCount = 0;
 }

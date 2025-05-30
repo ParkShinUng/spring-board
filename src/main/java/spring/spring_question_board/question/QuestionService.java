@@ -71,9 +71,9 @@ public class QuestionService {
     }
 
     public Question getQuestion(Integer id) {
-        Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            return question.get();
+        Optional<Question> optionalQuestion = this.questionRepository.findById(id);
+        if (optionalQuestion.isPresent()) {
+            return optionalQuestion.get();
         } else {
             throw new DataNotFoundException("question not found");
         }
@@ -118,7 +118,10 @@ public class QuestionService {
         return this.questionRepository.findAll(spec, pageable);
     }
 
-
-
+    public void viewUp(Integer id) {
+        Question question = this.getQuestion(id);
+        question.setViewCount(question.getViewCount() + 1);
+        this.questionRepository.save(question);
+    }
 
 }

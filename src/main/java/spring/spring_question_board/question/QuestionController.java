@@ -47,6 +47,7 @@ public class QuestionController {
     public String detail(Model model, @PathVariable("id") Integer id,
                          @RequestParam(value = "page", defaultValue = "0") int page,
                          AnswerForm answerForm) {
+        this.questionService.viewUp(id);
         Question question = this.questionService.getQuestion(id);
         Page<Answer> paging = this.answerService.getListByQuestion(page, question);
         List<Category> categoryList = this.categoryService.getList();
