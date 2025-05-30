@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import spring.spring_question_board.CommonUtil;
 import spring.spring_question_board.DataNotFoundException;
 import spring.spring_question_board.answer.Answer;
 import spring.spring_question_board.answer.AnswerRepository;
@@ -58,14 +59,14 @@ public class QuestionService {
     }
 
     public Page<Question> getPagingQuestionList(int page, String keyword) {
-        Pageable pageable = getPageable(page, 10, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate");
         Specification<Question> spec = search(keyword);
         return this.questionRepository.findAll(spec, pageable);
 //        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
     }
 
     public Page<Question> getPagingCategoryQuestionList(Category category, int page) {
-        Pageable pageable = getPageable(page, 10, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate");
         return this.questionRepository.findByCategory(category, pageable);
     }
 
@@ -107,19 +108,17 @@ public class QuestionService {
     }
 
     public Page<Question> getListByAuthor(int page, SiteUser siteUser) {
-        Pageable pageable = getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
         return this.questionRepository.findByAuthor(siteUser, pageable);
     }
 
     public Page<Question> getListByVoter(int page, SiteUser siteUser) {
-        Pageable pageable = getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
         Specification<Question> spec = this.hasVoter(siteUser);
         return this.questionRepository.findAll(spec, pageable);
     }
 
-    private Pageable getPageable(int page, int pageSize, String sortProperty) {
-        List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc(sortProperty));
-        return PageRequest.of(page, pageSize, Sort.by(sortList));
-    }
+
+
+
 }

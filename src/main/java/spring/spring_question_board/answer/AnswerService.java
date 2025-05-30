@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import spring.spring_question_board.CommonUtil;
 import spring.spring_question_board.DataNotFoundException;
 import spring.spring_question_board.question.Question;
 import spring.spring_question_board.user.SiteUser;
@@ -77,24 +78,19 @@ public class AnswerService {
     }
 
     public Page<Answer> getListByQuestion(int page, Question question) {
-        Pageable pageable = this.getPageable(page, 5,"createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5,"createDate");
         return this.answerRepository.findByQuestion(question, pageable);
     }
 
     public Page<Answer> getListByAuthor(int page, SiteUser siteUser) {
-        Pageable pageable = this.getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
         return this.answerRepository.findByAuthor(siteUser, pageable);
     }
 
     public Page<Answer> getListByVoter(int page, SiteUser siteUser) {
-        Pageable pageable = getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
         Specification<Answer> spec = this.hasVoter(siteUser);
         return this.answerRepository.findAll(spec, pageable);
     }
 
-    private Pageable getPageable(int page, int pageSize, String sortProperty) {
-        List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc(sortProperty));
-        return PageRequest.of(page, pageSize, Sort.by(sortList));
-    }
 }
