@@ -36,11 +36,6 @@ public class UserController {
     private final AnswerService answerService;
     private final JavaMailSender javaMailSender;
 
-    @PostConstruct
-    public void checkUserService() {
-        System.out.println("UserService is null? " + (this.userService == null));
-    }
-
     @GetMapping("/signup")
     public String signup(UserCreateForm userCreateForm) {
         return "signup_form";
@@ -114,11 +109,10 @@ public class UserController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String profile(Model model,
+    public String profile(UserUpdateForm userUpdateForm, Model model, Principal principal,
                            @RequestParam(value="question-page", defaultValue="0") int questionPage,
                            @RequestParam(value="answer-page", defaultValue="0") int answerPage,
-                           @RequestParam(value="voter-page", defaultValue="0") int voterPage,
-                           Principal principal) {
+                           @RequestParam(value="voter-page", defaultValue="0") int voterPage) {
         SiteUser siteUser = this.userService.getUser(principal.getName());
         Page<Question> wroteQuestions = this.questionService.getListByAuthor(questionPage, siteUser);
         Page<Answer> wroteAnswers = this.answerService.getListByAuthor(answerPage, siteUser);
@@ -134,6 +128,47 @@ public class UserController {
 
         return "profile_form";
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/profile")
+    public String profile(@Valid UserUpdateForm userUpdateForm,
+                          BindingResult bindingResult, Model model, Principal principal) {
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        Page<Question> wroteQuestions = this.questionService.getListByAuthor(0, siteUser);
+        Page<Answer> wroteAnswers = this.answerService.getListByAuthor(0, siteUser);
+        Page<Question> votedQuestions = this.questionService.getListByVoter(0, siteUser);
+        Page<Answer> votedAnswers = this.answerService.getListByVoter(0, siteUser);
+
+        model.addAttribute("wrote_question_paging", wroteQuestions);
+        model.addAttribute("wrote_answer_paging", wroteAnswers);
+        model.addAttribute("voted_question_paging", votedQuestions);
+        model.addAttribute("voted_answer_paging", votedAnswers);
+        model.addAttribute("username", siteUser.getUsername());
+        model.addAttribute("userEmail", siteUser.getEmail());
+
+        if (bindingResult.hasErrors()) {
+            return "profile_form";
+        }
+
+        if (!this.userService.isMatch(userUpdateForm.getOriginPassword(), siteUser.getPassword())) {
+            bindingResult.reject("PasswordInCorrect", "기존 비밀번호가 일치하지 않습니다.");
+            return "profile_form";
+        }
+
+        if (!userUpdateForm.getPassword1().equals(userUpdateForm.getPassword2())) {
+            bindingResult.reject("PasswordInCorrect", "새로운 비밀번호가 일치하지 않습니다.");
+            return "profile_form";
+        }
+
+        try {
+            this.userService.updatePassword(siteUser, userUpdateForm.getPassword1());
+        } catch (Exception e){
+            e.printStackTrace();
+            bindingResult.reject("updateFailed", e.getMessage());
+        }
+        return "profile_form";
+    }
+
 
     private static SimpleMailMessage getNewPasswordSimpleMailMessage(String email, SiteUser siteUser, String newPassword) {
         String mailContent = String.format("%s 님의 계정 비밀번호가 임시 비밀번호로 초기화 되었습니다.\n\n " +

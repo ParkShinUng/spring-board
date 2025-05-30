@@ -43,7 +43,11 @@ public class UserService {
     }
 
     public void updatePassword(SiteUser siteUser, String newPassword) {
-        siteUser.setPassword(newPassword);
+        siteUser.setPassword(passwordEncoder.encode(newPassword));
         this.userRepository.save(siteUser);
+    }
+
+    public boolean isMatch(String rawPassword, String encodedPassword) {
+        return this.passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }
