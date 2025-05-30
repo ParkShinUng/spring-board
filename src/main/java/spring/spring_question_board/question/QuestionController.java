@@ -44,12 +44,12 @@ public class QuestionController {
     }
 
     @GetMapping(value = "/detail/{id}")
-    public String detail(Model model, @PathVariable("id") Integer id,
-                         @RequestParam(value = "page", defaultValue = "0") int page,
-                         AnswerForm answerForm) {
+    public String detail(Model model, @PathVariable("id") Integer id, AnswerForm answerForm,
+                         @RequestParam(value="page", defaultValue="0") int page,
+                         @RequestParam(value="ans-ordering", defaultValue="time") String orderMethod) {
         this.questionService.viewUp(id);
         Question question = this.questionService.getQuestion(id);
-        Page<Answer> paging = this.answerService.getListByQuestion(page, question);
+        Page<Answer> paging = this.answerService.getListByQuestion(page, question, orderMethod);
         List<Category> categoryList = this.categoryService.getList();
 
         model.addAttribute("paging", paging);

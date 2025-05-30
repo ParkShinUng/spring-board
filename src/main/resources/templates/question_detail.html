@@ -41,8 +41,12 @@
             </div>
         </div>
         <!-- 답변 개수 표시 -->
-        <h5 class="border-bottom my-3 py-2"
-            th:text="|${#lists.size(question.answerList)}개의 답변이 있습니다.|"></h5>
+        <h5 class="border-bottom my-3 py-2"  th:text="|댓글 ${#lists.size(question.answerList)}|"></h5>
+        <!-- 댓글 정렬 -->
+        <a href="javascript:void(0);" class="ordering btn btn-sm btn-outline-secondary"
+           th:data-uri="@{|/question/detail/${question.id}?ans-ordering=ascCreateDate|}" th:text="등록순"></a>
+        <a href="javascript:void(0);" class="ordering btn btn-sm btn-outline-secondary"
+           th:data-uri="@{|/question/detail/${question.id}?ans-ordering=descCreateDate|}" th:text="최신순"></a>
         <!-- 답변 반복 Start -->
         <div class="card my-3" th:each="answer, loop : ${paging}">
             <a th:id="|answer_${answer.id}|"></a>
@@ -128,6 +132,12 @@
                 if(confirm("정말 추천하시겠습니까?")) {
                     location.href = this.dataset.uri;
                 };
+            });
+        });
+        const order_elements = document.getElementsByClassName('ordering');
+        Array.from(order_elements).forEach(function(element) {
+            element.addEventListener('click', function() {
+                location.href = this.dataset.uri;
             });
         });
     </script>

@@ -59,14 +59,14 @@ public class QuestionService {
     }
 
     public Page<Question> getPagingQuestionList(int page, String keyword) {
-        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate", "desc");
         Specification<Question> spec = search(keyword);
         return this.questionRepository.findAll(spec, pageable);
 //        return this.questionRepository.findAllByKeyword(keyword, pageable);       // 직접 쿼리 작성 방식
     }
 
     public Page<Question> getPagingCategoryQuestionList(Category category, int page) {
-        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 10, "createDate", "desc");
         return this.questionRepository.findByCategory(category, pageable);
     }
 
@@ -108,12 +108,12 @@ public class QuestionService {
     }
 
     public Page<Question> getListByAuthor(int page, SiteUser siteUser) {
-        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate", "desc");
         return this.questionRepository.findByAuthor(siteUser, pageable);
     }
 
     public Page<Question> getListByVoter(int page, SiteUser siteUser) {
-        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate", "desc");
         Specification<Question> spec = this.hasVoter(siteUser);
         return this.questionRepository.findAll(spec, pageable);
     }

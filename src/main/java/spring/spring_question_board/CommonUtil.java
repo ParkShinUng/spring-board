@@ -20,9 +20,14 @@ public class CommonUtil {
         return renderer.render(document);
     }
 
-    public static Pageable getPageable(int page, int pageSize, String sortProperty) {
+    public static Pageable getPageable(int page, int pageSize, String sortProperty, String sortOrder) {
         List<Sort.Order> sortList = new ArrayList<>();
-        sortList.add(Sort.Order.desc(sortProperty));
+        if (sortOrder.equals("desc")) {
+            sortList.add(Sort.Order.desc(sortProperty));
+        } else {
+            sortList.add(Sort.Order.asc(sortProperty));
+        }
+
         return PageRequest.of(page, pageSize, Sort.by(sortList));
     }
 }

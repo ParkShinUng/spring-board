@@ -77,18 +77,22 @@ public class AnswerService {
         this.answerRepository.save(answer);
     }
 
-    public Page<Answer> getListByQuestion(int page, Question question) {
-        Pageable pageable = CommonUtil.getPageable(page, 5,"createDate");
+    public Page<Answer> getListByQuestion(int page, Question question, String orderMethod) {
+        String orderKind = "asc";
+        if (orderMethod.startsWith("desc")) {
+            orderKind = "desc";
+        }
+        Pageable pageable = CommonUtil.getPageable(page, 5,"createDate", orderKind);
         return this.answerRepository.findByQuestion(question, pageable);
     }
 
     public Page<Answer> getListByAuthor(int page, SiteUser siteUser) {
-        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate", "desc");
         return this.answerRepository.findByAuthor(siteUser, pageable);
     }
 
     public Page<Answer> getListByVoter(int page, SiteUser siteUser) {
-        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate");
+        Pageable pageable = CommonUtil.getPageable(page, 5, "createDate", "desc");
         Specification<Answer> spec = this.hasVoter(siteUser);
         return this.answerRepository.findAll(spec, pageable);
     }
