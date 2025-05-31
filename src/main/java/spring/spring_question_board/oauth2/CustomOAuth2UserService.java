@@ -54,7 +54,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             String name = (String) response.get("name");
             String email = (String) response.get("email");
-            System.out.println("email = " + email);
             return this.userService.socialLogin(registrationId, name, email);
         }
         throw new ExecutionControl.NotImplementedException("Implemented Google and Naver login only");

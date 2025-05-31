@@ -70,7 +70,6 @@ public class QuestionController {
     @PostMapping("/create")
     public String questionCreate(@Valid QuestionForm questionForm, BindingResult bindingResult, Principal principal) {
         if (bindingResult.hasErrors()) {
-            System.out.println("Question Create Error");
             return "question_form";
         }
         SiteUser siteUser = this.userService.getUser(principal.getName());
@@ -120,8 +119,6 @@ public class QuestionController {
     @GetMapping("/delete/{id}")
     public String questionDelete(Principal principal, @PathVariable("id") Integer id, Model model) {
         Question question = this.questionService.getQuestion(id);
-        System.out.println(question.getAuthor().getUsername());
-        System.out.println(principal.getName());
         if (!question.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
         }
